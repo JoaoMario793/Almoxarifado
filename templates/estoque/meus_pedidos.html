@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}Meus Pedidos{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="linha-acoes" style="justify-content: space-between; margin-bottom: 0.75rem;">
+    <h1 style="margin: 0;">Meus pedidos</h1>
+    <a href="{% url 'estoque:pedido_criar' %}" class="btn">+ Novo pedido</a>
+  </div>
+  <div class="tabela-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Data</th>
+          <th>Material</th>
+          <th>Quantidade</th>
+          <th>Setor</th>
+          <th>Status</th>
+          <th>Decisão / Motivo</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in pedidos %}
+        <tr>
+          <td>{{ p.pk }}</td>
+          <td>{{ p.criado_em|date:"d/m/Y H:i" }}</td>
+          <td>{{ p.material.nome }}</td>
+          <td>{{ p.quantidade }} {{ p.material.unidade_medida }}</td>
+          <td>{{ p.setor.nome }}</td>
+          <td>
+            {% if p.status == "PENDENTE" %}
+              <span class="badge-sem" style="background:#B9770E;">Pendente</span>
+            {% elif p.status == "ATENDIDO" %}
+              <span class="badge-ok">Atendido</span>
+            {% else %}
+              <span class="badge-sem">Recusado</span>
+            {% endif %}
+          </td>
+          <td>
+            {% if p.decidido_por %}
+              Por {{ p.decidido_por.get_full_name|default:p.decidido_por.username }} em {{ p.decidido_em|date:"d/m/Y H:i" }}
+              {% if p.motivo_recusa %}<br><strong>Motivo:</strong> {{ p.motivo_recusa }}{% endif %}
+            {% else %}
+              Aguardando análise
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="7">Você ainda não registou pedidos.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

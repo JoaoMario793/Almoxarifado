@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Solicitantes{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 620px;">
+  <h1>Cadastrar conta de solicitante</h1>
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="campo">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for erro in field.errors %}
+          <div class="erro-campo">{{ erro }}</div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn">Cadastrar solicitante</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Solicitantes cadastrados</h2>
+  <div class="tabela-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Nome</th>
+          <th>Utilizador</th>
+          <th>Setor de lotação</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in perfis %}
+        <tr>
+          <td>{{ p.usuario.get_full_name|default:p.usuario.username }}</td>
+          <td>{{ p.usuario.username }}</td>
+          <td>{{ p.setor.nome }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="3">Nenhum solicitante cadastrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

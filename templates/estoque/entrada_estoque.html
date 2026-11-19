@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Entrada de Estoque{% endblock %}
+
+{% block content %}
+<div class="card" style="max-width: 620px;">
+  <h1>Registrar entrada de material</h1>
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="campo">
+        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+        {{ field }}
+        {% for erro in field.errors %}
+          <div class="erro-campo">{{ erro }}</div>
+        {% endfor %}
+      </div>
+    {% endfor %}
+    <button type="submit" class="btn">Registrar entrada</button>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Entradas registradas recentemente</h2>
+  <div class="tabela-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Data/Hora</th>
+          <th>Material</th>
+          <th>Quantidade</th>
+          <th>Responsável</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for mov in entradas_recentes %}
+        <tr>
+          <td>{{ mov.criado_em|date:"d/m/Y H:i" }}</td>
+          <td>{{ mov.material.codigo }} — {{ mov.material.nome }}</td>
+          <td>+{{ mov.quantidade }} {{ mov.material.unidade_medida }}</td>
+          <td>{{ mov.responsavel.get_full_name|default:mov.responsavel.username }}</td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="4">Sem entradas registadas.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

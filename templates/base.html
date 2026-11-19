@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Almoxarifado{% endblock %}</title>
+  <style>
+    :root {
+      --verde: #2F9E41;
+      --verde-escuro: #237931;
+      --vermelho: #CD191E;
+      --vermelho-escuro: #9F1216;
+      --fundo: #F6F8F6;
+      --card: #FFFFFF;
+      --texto: #1E2420;
+      --borda: #D5DDD7;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--fundo);
+      color: var(--texto);
+      line-height: 1.45;
+    }
+
+    header {
+      background: var(--verde);
+      color: #FFFFFF;
+      padding: 0.9rem 1rem;
+      border-bottom: 4px solid var(--vermelho);
+    }
+
+    .topo {
+      max-width: 1080px;
+      margin: 0 auto;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.75rem;
+    }
+
+    .marca {
+      font-weight: 700;
+      font-size: 1.1rem;
+    }
+
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    nav a, .btn-sair {
+      color: #FFFFFF;
+      text-decoration: none;
+      padding: 0.4rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      background: rgba(0, 0, 0, 0.16);
+      border: none;
+      cursor: pointer;
+    }
+
+    nav a:hover, .btn-sair:hover {
+      background: rgba(0, 0, 0, 0.3);
+    }
+
+    .btn-sair {
+      background: var(--vermelho);
+    }
+
+    main {
+      max-width: 1080px;
+      margin: 1.25rem auto;
+      padding: 0 1rem;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--borda);
+      border-radius: 8px;
+      padding: 1.1rem;
+      margin-bottom: 1rem;
+    }
+
+    h1, h2 {
+      margin-top: 0;
+      font-size: 1.35rem;
+    }
+
+    .mensagens {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .msg {
+      padding: 0.7rem 0.9rem;
+      border-radius: 6px;
+      border-left: 5px solid var(--verde);
+      background: #E9F7EC;
+      color: #16491E;
+      font-size: 0.95rem;
+    }
+
+    .msg.error, .msg.danger {
+      border-left-color: var(--vermelho);
+      background: #FDECEC;
+      color: var(--vermelho-escuro);
+    }
+
+    .msg.warning {
+      border-left-color: #B9770E;
+      background: #FEF6E7;
+      color: #7D5108;
+    }
+
+    .badge-ok {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      background: var(--verde);
+      color: #FFFFFF;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .badge-sem {
+      display: inline-block;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      background: var(--vermelho);
+      color: #FFFFFF;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.5rem 0.9rem;
+      border-radius: 6px;
+      border: none;
+      background: var(--verde);
+      color: #FFFFFF;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      font-size: 0.92rem;
+    }
+
+    .btn:hover { background: var(--verde-escuro); }
+
+    .btn-vermelho {
+      background: var(--vermelho);
+    }
+
+    .btn-vermelho:hover { background: var(--vermelho-escuro); }
+
+    .campo {
+      margin-bottom: 0.85rem;
+    }
+
+    .campo label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.3rem;
+    }
+
+    .campo input, .campo select, .campo textarea {
+      width: 100%;
+      padding: 0.5rem 0.65rem;
+      border: 1px solid #B8C4BC;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      background: #FFFFFF;
+    }
+
+    .erro-campo {
+      color: var(--vermelho);
+      font-size: 0.88rem;
+      margin-top: 0.25rem;
+    }
+
+    .tabela-wrap {
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 560px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 0.6rem;
+      border-bottom: 1px solid var(--borda);
+      font-size: 0.92rem;
+    }
+
+    th { background: #EEF3EF; }
+
+    .linha-acoes {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topo">
+      <div class="marca">Almoxarifado — IFPI Campus Pedro II</div>
+      {% if user.is_authenticated %}
+      <nav aria-label="Navegação principal">
+        <a href="{% url 'estoque:catalogo' %}">Catálogo</a>
+        {% if eh_gerencia %}
+          <a href="{% url 'estoque:material_criar' %}">Novo material</a>
+          <a href="{% url 'estoque:entrada_estoque' %}">Registrar entrada</a>
+          <a href="{% url 'estoque:solicitantes' %}">Solicitantes</a>
+          <a href="{% url 'estoque:pedidos_gerencia' %}">Análise de pedidos</a>
+        {% else %}
+          <a href="{% url 'estoque:pedido_criar' %}">Solicitar material</a>
+          <a href="{% url 'estoque:meus_pedidos' %}">Meus pedidos</a>
+        {% endif %}
+        <form action="{% url 'logout' %}" method="post" style="display:inline;">
+          {% csrf_token %}
+          <button type="submit" class="btn-sair">Sair ({{ user.username }})</button>
+        </form>
+      </nav>
+      {% endif %}
+    </div>
+  </header>
+
+  <main>
+    {% if messages %}
+    <div class="mensagens" role="status">
+      {% for message in messages %}
+        <div class="msg {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

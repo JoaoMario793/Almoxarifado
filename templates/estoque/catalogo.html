@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+{% block title %}Catálogo de Materiais{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="linha-acoes" style="justify-content: space-between; margin-bottom: 0.75rem;">
+    <h1 style="margin: 0;">Catálogo de materiais</h1>
+    {% if eh_gerencia %}
+      <a href="{% url 'estoque:material_criar' %}" class="btn">+ Cadastrar material</a>
+    {% else %}
+      <a href="{% url 'estoque:pedido_criar' %}" class="btn">+ Novo pedido</a>
+    {% endif %}
+  </div>
+
+  <form method="get" class="linha-acoes" style="margin-bottom: 1rem;">
+    <div class="campo" style="flex: 1; min-width: 200px; margin: 0;">
+      <label for="busca-q">Buscar por nome ou código</label>
+      <input id="busca-q" type="text" name="q" value="{{ termo }}" placeholder="Ex.: PAP-A4 ou Resma">
+    </div>
+    <button type="submit" class="btn">Buscar</button>
+    {% if termo %}
+      <a href="{% url 'estoque:catalogo' %}" class="btn btn-vermelho">Limpar</a>
+    {% endif %}
+  </form>
+
+  <div class="tabela-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Código</th>
+          <th>Nome</th>
+          <th>Categoria</th>
+          <th>Unidade</th>
+          <th>Saldo</th>
+          <th>Disponibilidade</th>
+          {% if eh_gerencia %}<th>Ações</th>{% endif %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for m in materiais %}
+        <tr>
+          <td>{{ m.codigo }}</td>
+          <td>{{ m.nome }}</td>
+          <td>{{ m.categoria }}</td>
+          <td>{{ m.unidade_medida }}</td>
+          <td><strong>{{ m.saldo }}</strong></td>
+          <td>
+            {% if m.saldo > 0 %}
+              <span class="badge-ok">Disponível</span>
+            {% else %}
+              <span class="badge-sem">Sem estoque</span>
+            {% endif %}
+          </td>
+          {% if eh_gerencia %}
+          <td>
+            <a href="{% url 'estoque:material_editar' m.pk %}" class="btn">Editar</a>
+          </td>
+          {% endif %}
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7">Nenhum material encontrado.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

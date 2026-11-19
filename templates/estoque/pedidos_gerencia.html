@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}Análise de Pedidos{% endblock %}
+
+{% block content %}
+<div class="card">
+  <h1>Pedidos pendentes</h1>
+  <div class="tabela-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Data</th>
+          <th>Solicitante</th>
+          <th>Setor</th>
+          <th>Material (Saldo atual)</th>
+          <th>Qtd.</th>
+          <th>Justificativa</th>
+          <th>Decisão</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in pendentes %}
+        <tr>
+          <td>{{ p.pk }}</td>
+          <td>{{ p.criado_em|date:"d/m/Y H:i" }}</td>
+          <td>{{ p.solicitante.get_full_name|default:p.solicitante.username }}</td>
+          <td>{{ p.setor.nome }}</td>
+          <td>{{ p.material.nome }} (<strong>{{ p.material.saldo }}</strong>)</td>
+          <td>{{ p.quantidade }}</td>
+          <td>{{ p.justificativa }}</td>
+          <td>
+            <form method="post" action="{% url 'estoque:pedido_decidir' p.pk %}" style="min-width: 220px;">
+              {% csrf_token %}
+              <div class="campo" style="margin-bottom: 0.4rem;">
+                <label for="acao-{{ p.pk }}">Ação</label>
+                <select id="acao-{{ p.pk }}" name="acao">
+                  <option value="ATENDER">Atender</option>
+                  <option value="RECUSAR">Recusar</option>
+                </select>
+              </div>
+              <div class="campo" style="margin-bottom: 0.4rem;">
+                <label for="motivo-{{ p.pk }}">Motivo da recusa (se recusar)</label>
+                <input id="motivo-{{ p.pk }}" type="text" name="motivo_recusa" placeholder="Obrigatório na recusa">
+              </div>
+              <button type="submit" class="btn">Confirmar</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="8">Não há pedidos pendentes.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Histórico de movimentações (entradas e saídas)</h2>
+  <div class="tabela-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Data/Hora</th>
+          <th>Tipo</th>
+          <th>Material</th>
+          <th>Quantidade</th>
+          <th>Responsável</th>
+          <th>Detalhes do pedido</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for mov in movimentacoes %}
+        <tr>
+          <td>{{ mov.criado_em|date:"d/m/Y H:i" }}</td>
+          <td>
+            {% if mov.tipo == "ENTRADA" %}
+              <span class="badge-ok">Entrada</span>
+            {% else %}
+              <span class="badge-sem">Saída</span>
+            {% endif %}
+          </td>
+          <td>{{ mov.material.nome }}</td>
+          <td>{{ mov.quantidade }} {{ mov.material.unidade_medida }}</td>
+          <td>{{ mov.responsavel.get_full_name|default:mov.responsavel.username }}</td>
+          <td>
+            {% if mov.pedido %}
+              Pedido #{{ mov.pedido.pk }} — Solicitante: {{ mov.pedido.solicitante.get_full_name|default:mov.pedido.solicitante.username }} ({{ mov.pedido.setor.nome }})
+            {% else %}
+              Reposição direta
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">Nenhuma movimentação registada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
